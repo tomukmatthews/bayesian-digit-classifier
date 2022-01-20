@@ -70,7 +70,6 @@ class BayesianConvNet(pl.LightningModule):
                 max_pool_kernel_size=3,
             ),
         )
-
         self.fc_layers = nn.Sequential(BayesianLinear(64, num_classes), nn.Dropout(0.2), nn.ReLU())
 
     def forward(self, x):
@@ -80,6 +79,14 @@ class BayesianConvNet(pl.LightningModule):
         x = self.fc_layers(x)
         return F.log_softmax(x, dim=1)
 
+    def loss(self, x, y):
+        loss = self.sample_elbo(inputs=x,
+                                labels=y,
+                                criterion=nn.NLLLoss(),
+                                sample_nbr=3,
+                                complexity_cost_weight=1 / 50000)
+        return loss
+
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
@@ -88,10 +95,12 @@ class BayesianConvNet(pl.LightningModule):
         x, y = batch
         train_samples = len(x)
         logits = self.forward(x)
-        loss = F.nll_loss(logits, y)
+        # loss = F.nll_loss(logits, y)
+        loss = self.loss(x, y)
         preds = torch.argmax(logits, dim=1)
         train_acc = ACCURACY(preds, y)
-        self.log("train_acc", train_acc, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
+        self.log("train_acc", train_acc, prog_bar=False, on_step=False, on_epoch=True)
         self.log("train_samples", train_samples, prog_bar=True, on_step=False, on_epoch=True)
         return loss
 
@@ -99,10 +108,10 @@ class BayesianConvNet(pl.LightningModule):
         x, y = val_batch
         val_samples = len(x)
         logits = self.forward(x)
-        loss = F.nll_loss(logits, y)
+        # loss = F.nll_loss(logits, y)
+        loss = self.loss(x, y)
         preds = torch.argmax(logits, dim=1)
-        acc = ACCURACY(preds, y)
-        self.log("val_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
+        val_acc = ACCURACY(preds, y)
         self.log("val_loss", loss, prog_bar=False, on_step=False, on_epoch=True)
+        self.log("val_acc", val_acc, prog_bar=True, on_step=False, on_epoch=True)
         self.log("val_samples", val_samples, prog_bar=True, on_step=False, on_epoch=True)
-        return loss
