@@ -1,11 +1,9 @@
 import pandas as pd
-import streamlit as st
-from streamlit_drawable_canvas import st_canvas
-from run_model import bayesian_inference
-from torchvision import transforms
 import plotly.express as px
-import pandas as pd
+import streamlit as st
 import torch
+from inference import bayesian_predict
+from streamlit_drawable_canvas import st_canvas
 
 st.set_page_config(
     page_title="Bayesian Digit Classifier",
@@ -39,22 +37,19 @@ with col1:
 
 if canvas_result.image_data is not None:
 
-    multi_preds = bayesian_inference(canvas_result.image_data, process=True)
+    multi_preds = bayesian_predict(canvas_result.image_data, process=True)
 
     df = pd.DataFrame(multi_preds.detach().numpy())
-    df = pd.melt(df, value_vars=list(range(10))).rename(columns={
-        'variable': 'number',
-        'value': 'proba'
-    })
+    df = pd.melt(df, value_vars=list(range(10))).rename(
+        columns={"variable": "number", "value": "proba"}
+    )
 
     with col2:
         net_pred = torch.max(multi_preds.data, 1)[1].numpy()[0]
-        st.header(f'Prediction: {net_pred}')
+        st.header(f"Prediction: {net_pred}")
 
     fig = px.box(df, x="number", y="proba")
     st.plotly_chart(fig, use_container_width=True)
-
-
 
     # dm = MNISTDataModule()
     # dm.prepare_data()

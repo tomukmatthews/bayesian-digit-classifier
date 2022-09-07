@@ -1,14 +1,11 @@
-from torchmetrics.classification.accuracy import Accuracy
-
-from torch import nn
-import torch.nn.functional as F
-import torch
 import pytorch_lightning as pl
-
+import torch
+import torch.nn.functional as F
 from blitz.modules.conv_bayesian_layer import BayesianConv2d
 from blitz.modules.linear_bayesian_layer import BayesianLinear
 from blitz.utils import variational_estimator
-
+from torch import nn
+from torchmetrics.classification.accuracy import Accuracy
 
 ACCURACY = Accuracy()
 
@@ -20,7 +17,7 @@ def bayesian_conv2d_layer(
     max_pool_kernel_size: int,
     stride: int = 1,
     padding: int = 0,
-):
+) -> nn.Sequential:
 
     layer = nn.Sequential(
         BayesianConv2d(
@@ -80,11 +77,13 @@ class BayesianConvNet(pl.LightningModule):
         return F.log_softmax(x, dim=1)
 
     def loss(self, x, y):
-        loss = self.sample_elbo(inputs=x,
-                                labels=y,
-                                criterion=nn.NLLLoss(),
-                                sample_nbr=3,
-                                complexity_cost_weight=1 / 50000)
+        loss = self.sample_elbo(
+            inputs=x,
+            labels=y,
+            criterion=nn.NLLLoss(),
+            sample_nbr=3,
+            complexity_cost_weight=1 / 50000,
+        )
         return loss
 
     def configure_optimizers(self):
@@ -101,7 +100,13 @@ class BayesianConvNet(pl.LightningModule):
         train_acc = ACCURACY(preds, y)
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         self.log("train_acc", train_acc, prog_bar=False, on_step=False, on_epoch=True)
-        self.log("train_samples", train_samples, prog_bar=True, on_step=False, on_epoch=True)
+        self.log(
+            "train_samples",
+            float(train_samples),
+            prog_bar=True,
+            on_step=False,
+            on_epoch=True,
+        )
         return loss
 
     def validation_step(self, val_batch, batch_idx):
@@ -114,4 +119,4 @@ class BayesianConvNet(pl.LightningModule):
         val_acc = ACCURACY(preds, y)
         self.log("val_loss", loss, prog_bar=False, on_step=False, on_epoch=True)
         self.log("val_acc", val_acc, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("val_samples", val_samples, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("val_samples", float(val_samples), prog_bar=True, on_step=False, on_epoch=True)
