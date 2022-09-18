@@ -2,8 +2,10 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import torch
-from inference import bayesian_predict
+from inference import calculate_overall_prediction, generate_predictions, load_model
 from streamlit_drawable_canvas import st_canvas
+
+BAYESIAN_NETWORK = load_model()
 
 st.set_page_config(
     page_title="Bayesian Digit Classifier",
@@ -37,31 +39,22 @@ with col1:
 
 if canvas_result.image_data is not None:
 
-    multi_preds = bayesian_predict(canvas_result.image_data, process=True)
-
-    df = pd.DataFrame(multi_preds.detach().numpy())
-    df = pd.melt(df, value_vars=list(range(10))).rename(
+    multi_preds = generate_predictions(
+        numpy_image=canvas_result.image_data, bayesian_network=BAYESIAN_NETWORK, n_samples=3
+    )
+    print(calculate_overall_prediction(multi_preds))
+    preds_df = pd.DataFrame(multi_preds.detach().numpy())
+    target_classes = list(range(10))
+    preds_df = pd.melt(preds_df, value_vars=target_classes).rename(
         columns={"variable": "number", "value": "proba"}
     )
 
     with col2:
-        net_pred = torch.max(multi_preds.data, 1)[1].numpy()[0]
-        st.header(f"Prediction: {net_pred}")
+        overall_prediction = calculate_overall_prediction(multi_preds)
+        if overall_prediction:
+            st.header(f"Prediction: {overall_prediction}")
+        else:
+            st.header(f"Not a number")
 
-    fig = px.box(df, x="number", y="proba")
+    fig = px.box(preds_df, x="number", y="proba")
     st.plotly_chart(fig, use_container_width=True)
-
-    # dm = MNISTDataModule()
-    # dm.prepare_data()
-    # dm.setup()
-
-    # if st.button('Next Num:'):
-    #     images, labels = next(iter(dm.train_dataloader()))
-
-    #     TENSOR_TO_PIL = transforms.ToPILImage()
-    #     idx = 0
-    #     image = images[idx]
-    #     st.image(TENSOR_TO_PIL(images[idx]))
-    #     st.write(labels[idx], width=60)
-    #     prediction = inference(image)
-    #     st.write('Prediction: ', prediction)
