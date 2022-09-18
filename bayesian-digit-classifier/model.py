@@ -10,7 +10,7 @@ from torchmetrics.classification.accuracy import Accuracy
 ACCURACY = Accuracy()
 
 
-def bayesian_conv2d_layer(
+def bayesian_conv2d_unit(
     in_channels: int,
     out_channels: int,
     conv_kernel_size: int,
@@ -19,7 +19,7 @@ def bayesian_conv2d_layer(
     padding: int = 0,
 ) -> nn.Sequential:
 
-    layer = nn.Sequential(
+    bayesian_cnn_unit = nn.Sequential(
         BayesianConv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -31,7 +31,7 @@ def bayesian_conv2d_layer(
         nn.LazyBatchNorm2d(),
         nn.ReLU(),
     )
-    return layer
+    return bayesian_cnn_unit
 
 
 @variational_estimator
@@ -42,7 +42,7 @@ class BayesianConvNet(pl.LightningModule):
         self.learning_rate = learning_rate
 
         self.conv_layers = nn.Sequential(
-            bayesian_conv2d_layer(
+            bayesian_conv2d_unit(
                 in_channels=colour_channels,
                 out_channels=16,
                 conv_kernel_size=4,
@@ -50,7 +50,7 @@ class BayesianConvNet(pl.LightningModule):
                 padding=2,
                 max_pool_kernel_size=2,
             ),
-            bayesian_conv2d_layer(
+            bayesian_conv2d_unit(
                 in_channels=16,
                 out_channels=32,
                 conv_kernel_size=5,
@@ -58,7 +58,7 @@ class BayesianConvNet(pl.LightningModule):
                 padding=2,
                 max_pool_kernel_size=2,
             ),
-            bayesian_conv2d_layer(
+            bayesian_conv2d_unit(
                 in_channels=32,
                 out_channels=64,
                 conv_kernel_size=6,

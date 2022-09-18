@@ -60,12 +60,14 @@ def generate_predictions(
     return torch.squeeze(stacked)
 
 
-def calculate_overall_prediction(predictions: torch.Tensor, median_threshold: float = 0.2) -> Optional[int]:
+def calculate_overall_prediction(
+    predictions: torch.Tensor, median_threshold: float = 0.2
+) -> Optional[int]:
     """Extract a prediction based on the digit with the largest median probability, provided the median
     is larger than a given threshold.
 
     Args:
-        predictions (torch.Tensor): Predictions probabilities for each digit class for n_samples forward 
+        predictions (torch.Tensor): Predictions probabilities for each digit class for n_samples forward
             passes through the neural network.
         median_threshold (float): Minimum median (over the forward passes) probability for a digit
             classification to be accepted.
