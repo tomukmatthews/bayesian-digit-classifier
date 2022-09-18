@@ -15,10 +15,10 @@ EARLY_STOP_CALLBACK = EarlyStopping(
     mode="max",
 )
 
-PATH = "bayesian-digit-classifier/trained_models/bayesian_model.pt"
+MODEL_PATH = "bayesian-digit-classifier/trained_models/bayesian_model.pt"
 
 
-def train_model(save_path: Optional[str] = PATH):
+def train_model(save_path: Optional[str] = MODEL_PATH):
     model = BayesianConvNet()
     mnist_dm = MNISTDataModule()
     trainer = Trainer(max_epochs=10, callbacks=[EARLY_STOP_CALLBACK])
@@ -28,4 +28,4 @@ def train_model(save_path: Optional[str] = PATH):
 
 
 if __name__ == "__main__":
-    train_model(save_path=PATH)
+    train_model(save_path=MODEL_PATH)

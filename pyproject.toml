@@ -2,7 +2,8 @@
 name = "bayesian-digit-classifier"
 version = "0.1.0"
 description = ""
-authors = ["Tom Matthews <tom.matthews@creditkudos.com>"]
+authors = ["Tom Matthews <tomukmatthews@gmail.com>"]
+packages = [{include = "bayesian-digit-classifier"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
@@ -20,8 +21,6 @@ isort = "^5.10.1"
 torch-tb-profiler = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
-pycodestyle = "^2.8.0"
-pylint = "^2.12.2"
 black = { version = "^21.12b0", allow-prereleases = true }
 
 [tool.black]
@@ -29,7 +28,8 @@ line-length = 100
 
 [tool.isort]
 line_length = 100
-profile = "black"
+profile = "black" 
+# known_local_folder = ["bayesian-digit-classifier"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
