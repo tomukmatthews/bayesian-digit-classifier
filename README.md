@@ -17,5 +17,5 @@ Run `streamlit run bayesian-digit-classifier/app.py`.
 ## Re-train the model
 Run `streamlit run bayesian-digit-classifier/training.py`.
 
-## Re-train the model
+## Demo
 ![](https://github.com/tomukmatthews/bayesian-digit-classifier/blob/main/demo.gif)
