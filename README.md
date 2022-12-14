@@ -15,7 +15,7 @@ Try the app [here](https://tomukmatthews-bayesian-digi-bayesian-digit-classifier
 Run `streamlit run bayesian-digit-classifier/app.py`.
 
 ## Re-train the model
-Run `streamlit run bayesian-digit-classifier/training.py`.
+Run `python bayesian-digit-classifier/training.py`.
 
 ## Demo
 ![](https://github.com/tomukmatthews/bayesian-digit-classifier/blob/main/demo.gif)
